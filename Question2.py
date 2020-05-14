@@ -12,7 +12,7 @@
 import pandas as pd 
 import matplotlib.pyplot as plt
 import numpy as np
-import statistics as stat
+
 
 df = pd.read_csv("NYC_Bicycle_Counts_2016_Corrected.csv")
 
@@ -61,34 +61,22 @@ def least_squares(X, y):
 def mse(y , ybar):
     temp = 0
     for i in range(len(y)):
-        temp += (np.absolute(y[i] - ybar[i]) / y[i]) ** 2
+        temp += (np.absolute(y[i] - ybar[i])/ ybar[i]) ** 2
     return temp / len(y)
-
-def ac(y1 , ybar):
-    ac = 0
-    for i in range(len(y1)):
-        ac = ac+np.abs(y1[i] - ybar[i]) / y1[i]
-    ac /= len(y1)
-    return 1-ac
-
-def norm(x):
-    temp = []
-    mean = stat.mean(x)
-    std = stat.stdev(x)
-    for i in x:
-        temp.append((i - mean) / std)
-    
-    return temp
-
 ###########################################################################################################
 
 
 y = list(df['Total'])
 x = list(df['High Temp (°F)'])
 #x = [list(df['High Temp (°F)']) , list(df['Low Temp (°F)']) , list(df['Precipitation'])]
+
 x1 = []
 y1 = []
-x = norm(x)
+for i in range(2 * len(x) // 3):
+    x1.append(x[i])
+    y1.append(y[i])
+    
+x = list(df['Low Temp (°F)'])
 for i in range(2 * len(x) // 3):
     x1.append(x[i])
     y1.append(y[i])
@@ -112,20 +100,24 @@ for k in paramFits:
     plt.plot(x1, y_pred, label = 'n = '+ str(n))
 plt.xlabel('X')
 plt.ylabel('Y')
-plt.title('Train_')
+plt.title('Train')
 plt.legend(loc='upper left')
 plt.plot()
-plt.savefig('Q2train_test.png', dpi=200, bbox_inches='tight')
+plt.savefig('Q2train.png', dpi=200, bbox_inches='tight')
 plt.show()
 ###########################################################################################################
 
-
+x = list(df['High Temp (°F)'])
 xbar = []
 y1 = []
-for i in range(2*len(x) //3 , len(x)):
+for i in range(2 * len(x) // 3, len(x)):
     xbar.append(x[i])
     y1.append(y[i])
 
+x = list(df['Low Temp (°F)'])
+for i in range(2 * len(x) // 3, len(x)):
+    xbar.append(x[i])
+    y1.append(y[i])
 
 for k in range(len(paramFits)):
     ybar = []
@@ -140,15 +132,23 @@ for k in range(len(paramFits)):
     plt.xlabel('X', fontsize= 10)
     plt.ylabel('Y', fontsize= 10)
     plt.title('degree = ' + str(k+1))
-    plt.legend(['test set value' , 'predict value'])
-    if k + 1 == 9:
-        plt.text(45, -9000, 'mse = {:.4f}'.format(mse(y1 , ybar)), fontsize=11)
-        plt.text(45, -11500, '   ac = {:.4f}'.format(ac(y1 , ybar)), fontsize=11)
-    else:
-        plt.text(-2, 23800, 'mse = {:.4f}'.format(mse(y1 , ybar)), fontsize=11)
-        plt.text(-2, 22600, '   ac = {:.4f}'.format(ac(y1 , ybar)), fontsize=11)
     plt.plot()
-    plt.savefig('Q2degree_test'+ str(k+1)+ '.png', dpi=200, bbox_inches='tight')
+    plt.savefig('Q2degree'+ str(k+1)+ '.png', dpi=200, bbox_inches='tight')
     plt.show()
+    
+    ac = 0
+    for i in range(len(y1)):
+        ac = ac+ np.abs(y1[i] - ybar[i]) / y1[i]
+    ac /= len(y1)
+    ac = 1-ac
+    
+    m= 0
+    for i in range(len(y1)):
+        m= m+ ((np.absolute(y1[i]- ybar[i])/ y1[i])** 2)
+    m= m/ len(y1)
+    
+    print('ac:', k+1, ac)
+    print('mse', k+1, mse(y1, ybar), m)
+    
 ###########################################################################################################
     
